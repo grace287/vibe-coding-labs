@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>사과 받기 게임</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #87ceeb 0%, #e0f6ff 100%);
+      font-family: "Segoe UI", sans-serif;
+    }
+    h1 {
+      margin-bottom: 0.5rem;
+      color: #333;
+      font-size: 1.5rem;
+    }
+    .info {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+      color: #555;
+    }
+    .info span { font-weight: 600; }
+    #game {
+      width: 360px;
+      height: 480px;
+      background: linear-gradient(180deg, #a8e6a1 0%, #7bc67e 50%, #5a9e5c 100%);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    #basket {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 50px;
+      background: #8B4513;
+      border-radius: 0 0 12px 12px;
+      box-shadow: inset 0 -4px 0 #5D2E0C, 0 4px 0 rgba(0,0,0,0.2);
+      transition: left 0.08s ease-out;
+      pointer-events: none;
+    }
+    #basket::before {
+      content: "";
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 18px;
+      background: #A0522D;
+      border-radius: 50%;
+      box-shadow: 0 2px 0 #5D2E0C;
+    }
+    .apple {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      background: radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b);
+      border-radius: 50%;
+      box-shadow: inset -4px -4px 8px rgba(0,0,0,0.25), inset 2px 2px 4px rgba(255,255,255,0.3);
+      pointer-events: none;
+    }
+    .apple::after {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 10px;
+      background: #228B22;
+      border-radius: 2px;
+    }
+    #startScreen, #gameOverScreen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.5);
+      border-radius: 16px;
+      color: #fff;
+      text-align: center;
+      padding: 1.5rem;
+    }
+    #gameOverScreen { display: none; }
+    #startScreen h2, #gameOverScreen h2 { margin-bottom: 0.5rem; font-size: 1.25rem; }
+    #startScreen p, #gameOverScreen p { margin-bottom: 1rem; font-size: 0.9rem; opacity: 0.95; }
+    .btn {
+      padding: 0.6rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #333;
+      background: #fff;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .btn:hover { background: #f0f0f0; transform: scale(1.05); }
+    .lives {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .heart { color: #e74c3c; font-size: 1.1rem; }
+  </style>
+</head>
+<body>
+  <h1>🍎 사과 받기</h1>
+  <div class="info">
+    <span>점수: <strong id="score">0</strong></span>
+    <span>목숨: <span class="lives" id="lives">❤️❤️❤️</span></span>
+  </div>
+  <div id="game">
+    <div id="startScreen">
+      <h2>사과를 받아요</h2>
+      <p>좌우로 움직여 바구니로<br />떨어지는 사과를 받으세요!</p>
+      <p>방향키 ← → 또는 A, D</p>
+      <button class="btn" id="startBtn">시작하기</button>
+    </div>
+    <div id="gameOverScreen">
+      <h2>게임 오버</h2>
+      <p>최종 점수: <strong id="finalScore">0</strong></p>
+      <button class="btn" id="restartBtn">다시 하기</button>
+    </div>
+    <div id="basket"></div>
+  </div>
+
+  <script>
+    (function () {
+      const gameEl = document.getElementById("game");
+      const basketEl = document.getElementById("basket");
+      const startScreen = document.getElementById("startScreen");
+      const gameOverScreen = document.getElementById("gameOverScreen");
+      const scoreEl = document.getElementById("score");
+      const finalScoreEl = document.getElementById("finalScore");
+      const livesEl = document.getElementById("lives");
+
+      const GAME_W = 360;
+      const GAME_H = 480;
+      const BASKET_W = 80;
+      const BASKET_H = 50;
+      const BASKET_Y = GAME_H - 24 - BASKET_H;
+      const APPLE_SIZE = 36;
+      const FALL_SPEED = 2;
+      const SPAWN_INTERVAL = 1200;
+      const HEART = "❤️";
+      const MAX_LIVES = 3;
+
+      let basketX = (GAME_W - BASKET_W) / 2;
+      let score = 0;
+      let lives = MAX_LIVES;
+      let running = false;
+      let spawnTimer = null;
+      let apples = [];
+      let keys = { left: false, right: false };
+      let lastTime = 0;
+      let animId = null;
+
+      function rand(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function createApple() {
+        const apple = document.createElement("div");
+        apple.className = "apple";
+        apple.style.left = rand(0, GAME_W - APPLE_SIZE) + "px";
+        apple.style.top = "-40px";
+        apple.dataset.x = parseFloat(apple.style.left);
+        apple.dataset.y = -40;
+        apple.dataset.speed = FALL_SPEED + rand(0, 1);
+        gameEl.appendChild(apple);
+        apples.push(apple);
+      }
+
+      function updateApples(dt) {
+        for (let i = apples.length - 1; i >= 0; i--) {
+          const a = apples[i];
+          let y = parseFloat(a.dataset.y) + parseFloat(a.dataset.speed);
+          a.dataset.y = y;
+          a.style.top = y + "px";
+
+          if (y > GAME_H) {
+            a.remove();
+            apples.splice(i, 1);
+            lives--;
+            livesEl.textContent = HEART.repeat(lives);
+            if (lives <= 0) endGame();
+            continue;
+          }
+
+          const ax = parseFloat(a.dataset.x) + APPLE_SIZE / 2;
+          const ay = y + APPLE_SIZE;
+          if (ay >= BASKET_Y && ay <= BASKET_Y + BASKET_H &&
+              ax >= basketX + 10 && ax <= basketX + BASKET_W - 10) {
+            a.remove();
+            apples.splice(i, 1);
+            score++;
+            scoreEl.textContent = score;
+          }
+        }
+      }
+
+      function gameLoop(t) {
+        if (!running) return;
+        const dt = Math.min(t - lastTime, 50);
+        lastTime = t;
+
+        if (keys.right) basketX = Math.min(GAME_W - BASKET_W, basketX + 6);
+        if (keys.left)  basketX = Math.max(0, basketX - 6);
+        basketEl.style.left = basketX + "px";
+
+        updateApples(dt);
+        animId = requestAnimationFrame(gameLoop);
+      }
+
+      function startGame() {
+        startScreen.style.display = "none";
+        gameOverScreen.style.display = "none";
+        score = 0;
+        lives = MAX_LIVES;
+        scoreEl.textContent = "0";
+        livesEl.textContent = HEART.repeat(MAX_LIVES);
+        apples.forEach(a => a.remove());
+        apples = [];
+        basketX = (GAME_W - BASKET_W) / 2;
+        basketEl.style.left = basketX + "px";
+        running = true;
+        lastTime = performance.now();
+
+        if (spawnTimer) clearInterval(spawnTimer);
+        spawnTimer = setInterval(createApple, SPAWN_INTERVAL);
+
+        requestAnimationFrame(gameLoop);
+      }
+
+      function endGame() {
+        running = false;
+        if (animId) cancelAnimationFrame(animId);
+        if (spawnTimer) clearInterval(spawnTimer);
+        spawnTimer = null;
+        apples.forEach(a => a.remove());
+        apples = [];
+        finalScoreEl.textContent = score;
+        gameOverScreen.style.display = "flex";
+      }
+
+      document.getElementById("startBtn").addEventListener("click", startGame);
+      document.getElementById("restartBtn").addEventListener("click", startGame);
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { e.preventDefault(); keys.left = true; }
+        if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") { e.preventDefault(); keys.right = true; }
+      });
+      document.addEventListener("keyup", function (e) {
+        if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") keys.left = false;
+        if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.right = false;
+      });
+    })();
+  </script>
+</body>
+</html>

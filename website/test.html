@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vibe Coding Labs — 제품과 경험을 만듭니다</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* 일관된 색상 시스템 */
+      --bg: #0a0a0b;
+      --bg-elevated: #0f0f11;
+      --surface: #141418;
+      --surface-2: #1a1a1f;
+      --border: rgba(255, 255, 255, 0.07);
+      --border-strong: rgba(255, 255, 255, 0.1);
+      --text: #ececee;
+      --text-muted: #888a8e;
+      --text-faint: #5c5e62;
+      --accent: #c9a227;
+      --accent-hover: #d4af37;
+      --accent-soft: rgba(201, 162, 39, 0.12);
+      --accent-border: rgba(201, 162, 39, 0.25);
+      --gap: clamp(1.5rem, 4vw, 4rem);
+      --width: min(1120px, 92vw);
+      --font-sans: "DM Sans", system-ui, sans-serif;
+      --font-serif: "Instrument Serif", Georgia, serif;
+      --radius: 12px;
+      --radius-lg: 20px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap { width: var(--width); margin: 0 auto; padding-left: var(--gap); padding-right: var(--gap); }
+
+    /* ── Header ── */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1.25rem var(--gap);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to bottom, var(--bg) 0%, transparent 100%);
+      transition: background 0.3s ease;
+    }
+    header.scrolled { background: var(--bg); border-bottom: 1px solid var(--border); }
+    .logo { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 400; color: var(--text); text-decoration: none; }
+    nav { display: flex; gap: 2rem; }
+    nav a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+    nav a:hover { color: var(--accent); }
+
+    /* ── 이미지 공통 ── */
+    .img-wrap {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      background: var(--surface-2);
+    }
+    .img-wrap img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .img-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 1px solid var(--border);
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: var(--gap);
+      padding: calc(var(--gap) * 2) var(--gap) var(--gap);
+      background: var(--bg);
+    }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; padding-top: 6rem; }
+      .hero-visual { order: -1; max-height: 40vh; }
+    }
+    .hero .wrap { max-width: 540px; }
+    .hero-visual {
+      justify-self: end;
+      width: 100%;
+      max-width: 520px;
+      aspect-ratio: 4/3;
+    }
+    .hero h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin: 0 0 1.5rem;
+    }
+    .hero h1 em { font-style: italic; color: var(--accent); }
+    .hero p {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      max-width: 28em;
+      margin: 0 0 2.5rem;
+    }
+    .hero .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.5rem;
+      background: var(--accent);
+      color: var(--bg);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .hero .cta:hover { background: var(--accent-hover); opacity: 1; transform: translateY(-1px); }
+
+    /* ── Section common ── */
+    section {
+      padding: calc(var(--gap) * 2.5) 0;
+      border-top: 1px solid var(--border);
+    }
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+    h2 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 400;
+      line-height: 1.2;
+      margin: 0 0 1.5rem;
+      max-width: 18ch;
+    }
+
+    /* ── About ── */
+    .about { background: var(--bg-elevated); }
+    .about .wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+      align-items: center;
+    }
+    @media (max-width: 720px) {
+      .about .wrap { grid-template-columns: 1fr; }
+      .about-visual { aspect-ratio: 16/10; }
+    }
+    .about-content { min-width: 0; }
+    .about-visual {
+      aspect-ratio: 4/3;
+      min-height: 240px;
+    }
+    .about-text { color: var(--text-muted); font-size: 1.0625rem; }
+    .about-text p { margin: 0 0 1rem; }
+    .about-text p:last-child { margin-bottom: 0; }
+
+    /* ── Services / Values ── */
+    .services .wrap { max-width: 720px; }
+    .services-list { margin-top: 2rem; }
+    .services-list article {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: var(--gap);
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .services-list article:last-child { border-bottom: 0; }
+    @media (max-width: 600px) { .services-list article { grid-template-columns: 1fr; gap: 0.5rem; } }
+    .services-list h3 {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-weight: 400;
+      margin: 0;
+      color: var(--text);
+    }
+    .services-list p { margin: 0; color: var(--text-muted); font-size: 0.9375rem; }
+
+    /* ── Numbers ── */
+    .numbers { background: var(--surface); border-color: var(--border-strong); }
+    .numbers .wrap {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--gap);
+      text-align: center;
+    }
+    @media (max-width: 640px) { .numbers .wrap { grid-template-columns: 1fr; } }
+    .numbers .value {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--accent);
+      margin-bottom: 0.25rem;
+    }
+    .numbers .label { font-size: 0.875rem; color: var(--text-muted); }
+
+    /* ── CTA ── */
+    .cta-section .wrap {
+      text-align: center;
+      padding: calc(var(--gap) * 2) var(--gap);
+    }
+    .cta-section h2 { max-width: none; margin-left: auto; margin-right: auto; }
+    .cta-section p { color: var(--text-muted); margin: 0 0 2rem; }
+    .cta-section .cta { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 1.5rem; background: var(--accent); color: var(--bg); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: opacity 0.2s; }
+    .cta-section .cta:hover { background: var(--accent-hover); opacity: 1; }
+
+    /* ── Work / Gallery ── */
+    .work { background: var(--bg-elevated); }
+    .work .wrap { max-width: 1120px; }
+    .work-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 720px) { .work-grid { grid-template-columns: 1fr; } }
+    .work-grid .img-wrap { aspect-ratio: 4/3; }
+
+    /* ── Footer ── */
+    footer {
+      padding: 2rem var(--gap);
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    footer .logo { font-size: 1.25rem; }
+    footer p { margin: 0; font-size: 0.8125rem; color: var(--text-muted); }
+    footer a { color: var(--text-muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header id="header">
+    <a href="#" class="logo">Vibe Coding Labs</a>
+    <nav>
+      <a href="#about">소개</a>
+      <a href="#services">역량</a>
+      <a href="#work">프로젝트</a>
+      <a href="#contact">연락</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <h1>제품과 경험을<br /><em>정확하게</em> 만듭니다.</h1>
+        <p>기획부터 설계, 개발까지 한 흐름으로 이어지는 팀이자 스튜디오입니다. 트렌드에 맞는 기술과 검증된 프로세스로 결과를 만듭니다.</p>
+        <a href="#contact" class="cta">프로젝트 문의 →</a>
+      </div>
+      <div class="hero-visual img-wrap">
+        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80" alt="오피스 워크스페이스" width="800" height="600" />
+      </div>
+    </section>
+
+    <section id="about" class="about">
+      <div class="wrap">
+        <div class="about-content">
+          <p class="section-label">About</p>
+          <h2>우리는 왜 존재하는가.</h2>
+          <div class="about-text">
+            <p>Vibe Coding Labs는 디지털 제품과 브랜드 경험을 설계·구현하는 스튜디오입니다. 단순 실행이 아니라 전략, 디자인, 엔지니어링이 하나의 맥락으로 맞물려야 한다고 믿습니다.</p>
+            <p>클라이언트와의 신뢰와 소통을 전제로, 트렌드를 반영한 디자인과 안정적인 기술로 목표를 달성하는 데 집중합니다.</p>
+          </div>
+        </div>
+        <div class="about-visual img-wrap">
+          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=700&q=80" alt="팀 협업" width="700" height="525" />
+        </div>
+      </div>
+    </section>
+
+    <section id="services" class="services">
+      <div class="wrap">
+        <p class="section-label">Services</p>
+        <h2>우리가 하는 일.</h2>
+        <div class="services-list">
+          <article>
+            <h3>제품 기획·설계</h3>
+            <p>요구사항 정리, 사용자 플로우, 정보 구조 설계를 통해 방향을 정하고, 개발 가능한 스펙으로 정리합니다.</p>
+          </article>
+          <article>
+            <h3>브랜드·UI 디자인</h3>
+            <p>브랜드 톤과 시각 정체성을 정의하고, 웹·앱 인터페이스를 체계적으로 디자인합니다. 트렌드를 반영하되 과하지 않게.</p>
+          </article>
+          <article>
+            <h3>개발·구현</h3>
+            <p>웹·앱 프론트엔드와 백엔드, 배포·운영까지. 검증된 스택과 프로세스로 안정적으로 구현합니다.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="work" class="work">
+      <div class="wrap">
+        <p class="section-label">Work</p>
+        <h2>선택한 프로젝트.</h2>
+        <div class="work-grid">
+          <div class="img-wrap">
+            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80" alt="프로젝트 1" width="600" height="450" />
+          </div>
+          <div class="img-wrap">
+            <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=80" alt="프로젝트 2" width="600" height="450" />
+          </div>
+          <div class="img-wrap">
+            <img src="https://images.unsplash.com/photo-1547658719-da2b51169166?w=600&q=80" alt="프로젝트 3" width="600" height="450" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="numbers">
+      <div class="wrap">
+        <div>
+          <div class="value">50+</div>
+          <div class="label">완료 프로젝트</div>
+        </div>
+        <div>
+          <div class="value">8</div>
+          <div class="label">협업 연도</div>
+        </div>
+        <div>
+          <div class="value">100%</div>
+          <div class="label">클라이언트 중심</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="cta-section">
+      <div class="wrap">
+        <p class="section-label">Contact</p>
+        <h2>함께할 다음 프로젝트를 기다립니다.</h2>
+        <p>기업 소개, 제품 런칭, 리브랜딩, 웹·앱 제작 등 어떤 아이디어든 편하게 말씀해 주세요.</p>
+        <a href="mailto:hello@vibecodinglabs.com" class="cta">hello@vibecodinglabs.com →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <a href="#" class="logo">Vibe Coding Labs</a>
+    <p>© 2025 Vibe Coding Labs. All rights reserved.</p>
+    <a href="#">Privacy</a>
+  </footer>
+
+  <script>
+    (function () {
+      var header = document.getElementById("header");
+      function onScroll() {
+        header.classList.toggle("scrolled", window.scrollY > 60);
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+    })();
+  </script>
+</body>
+</html>

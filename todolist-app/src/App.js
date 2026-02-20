@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import './App.css';
 
 function nextId() {
@@ -10,9 +10,10 @@ function formatDate(date) {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
-function TodoListContainer({ container, onEdit, onSave, onDelete, onAddTodo, onToggleTodo, searchQuery }) {
+function TodoListContainer({ container, onEdit, onSave, onDelete, onAddTodo, onToggleTodo, onAfterDelete, searchQuery }) {
   const { id, dateLabel, todos, isEditMode } = container;
-  const [editTexts, setEditTexts] = useState({}); // id -> text for edit mode
+  const [editTexts, setEditTexts] = useState({});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const filteredTodos = searchQuery.trim()
     ? todos.filter(t => t.text.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -35,50 +36,81 @@ function TodoListContainer({ container, onEdit, onSave, onDelete, onAddTodo, onT
     setEditTexts(prev => ({ ...prev, [todoId]: text }));
   };
 
+  const handleDeleteClick = () => setShowDeleteModal(true);
+
+  const handleDeleteConfirm = () => {
+    onDelete(id);
+    onAfterDelete?.();
+    setShowDeleteModal(false);
+  };
+
   if (filteredTodos.length === 0 && searchQuery.trim()) return null;
 
   return (
-    <div className="todo-container">
-      <div className="container-header">
-        <span className="date-label">{dateLabel}</span>
-        <div className="header-actions">
-          {!isEditMode ? (
-            <>
-              <button type="button" className="btn btn-edit" onClick={startEdit}>수정</button>
-              <button type="button" className="btn btn-delete" onClick={() => onDelete(id)}>삭제</button>
-            </>
-          ) : (
-            <button type="button" className="btn btn-save" onClick={handleSave}>저장</button>
-          )}
-        </div>
-      </div>
-      <ul className="todo-list">
-        {filteredTodos.map(todo => (
-          <li key={todo.id} className="todo-item">
-            {isEditMode ? (
-              <input
-                type="text"
-                className="todo-input-edit"
-                value={editTexts[todo.id] ?? todo.text}
-                onChange={e => updateEditText(todo.id, e.target.value)}
-              />
-            ) : (
+    <>
+      <div className="card todo-container shadow-sm">
+        <div className="card-header bg-light d-flex justify-content-between align-items-center py-2">
+          <span className="fw-semibold text-dark">{dateLabel}</span>
+          <div className="btn-group btn-group-sm">
+            {!isEditMode ? (
               <>
-                <input
-                  type="checkbox"
-                  checked={todo.done}
-                  onChange={() => onToggleTodo(id, todo.id)}
-                />
-                <span className={todo.done ? 'todo-text done' : 'todo-text'}>{todo.text}</span>
+                <button type="button" className="btn btn-outline-secondary" onClick={startEdit}>수정</button>
+                <button type="button" className="btn btn-outline-danger" onClick={handleDeleteClick}>삭제</button>
               </>
+            ) : (
+              <button type="button" className="btn btn-success" onClick={handleSave}>저장</button>
             )}
-          </li>
-        ))}
-      </ul>
-      {!isEditMode && (
-        <AddTodoInput containerId={id} onAdd={onAddTodo} placeholder="할 일 입력 후 Enter" />
-      )}
-    </div>
+          </div>
+        </div>
+        <ul className="list-group list-group-flush">
+          {filteredTodos.map(todo => (
+            <li key={todo.id} className="list-group-item d-flex align-items-center gap-2">
+              {isEditMode ? (
+                <input
+                  type="text"
+                  className="form-control form-control-sm"
+                  value={editTexts[todo.id] ?? todo.text}
+                  onChange={e => updateEditText(todo.id, e.target.value)}
+                />
+              ) : (
+                <>
+                  <input
+                    type="checkbox"
+                    className="form-check-input flex-shrink-0"
+                    checked={todo.done}
+                    onChange={() => onToggleTodo(id, todo.id)}
+                  />
+                  <span className={todo.done ? 'text-muted text-decoration-line-through flex-grow-1' : 'flex-grow-1'}>{todo.text}</span>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+        {!isEditMode && (
+          <AddTodoInput containerId={id} onAdd={onAddTodo} placeholder="할 일 입력 후 Enter" />
+        )}
+      </div>
+
+      {/* 삭제 확인 모달 */}
+      <div className={`modal fade ${showDeleteModal ? 'show' : ''}`} style={{ display: showDeleteModal ? 'block' : 'none' }} tabIndex={-1} aria-hidden={!showDeleteModal}>
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">삭제 확인</h5>
+              <button type="button" className="btn-close" onClick={() => setShowDeleteModal(false)} aria-label="닫기" />
+            </div>
+            <div className="modal-body">
+              이 할 일 목록을 삭제하시겠습니까?
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteModal(false)}>취소</button>
+              <button type="button" className="btn btn-danger" onClick={handleDeleteConfirm}>삭제</button>
+            </div>
+          </div>
+        </div>
+        {showDeleteModal && <div className="modal-backdrop fade show" onClick={() => setShowDeleteModal(false)} />}
+      </div>
+    </>
   );
 }
 
@@ -92,15 +124,15 @@ function AddTodoInput({ containerId, onAdd, placeholder }) {
     setValue('');
   };
   return (
-    <form className="add-todo-form" onSubmit={handleSubmit}>
+    <form className="p-2 border-top bg-white d-flex gap-2" onSubmit={handleSubmit}>
       <input
         type="text"
-        className="todo-input"
+        className="form-control form-control-sm"
         placeholder={placeholder}
         value={value}
         onChange={e => setValue(e.target.value)}
       />
-      <button type="submit" className="btn btn-add">추가</button>
+      <button type="submit" className="btn btn-primary btn-sm">추가</button>
     </form>
   );
 }
@@ -108,6 +140,17 @@ function AddTodoInput({ containerId, onAdd, placeholder }) {
 function App() {
   const [containers, setContainers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [deleteAlert, setDeleteAlert] = useState(false);
+
+  const showDeleteAlert = useCallback(() => {
+    setDeleteAlert(true);
+  }, []);
+
+  useEffect(() => {
+    if (!deleteAlert) return;
+    const t = setTimeout(() => setDeleteAlert(false), 3000);
+    return () => clearTimeout(t);
+  }, [deleteAlert]);
 
   const addNewTodoList = useCallback(() => {
     const dateLabel = formatDate(new Date());
@@ -149,10 +192,7 @@ function App() {
   }, []);
 
   const deleteContainer = useCallback((containerId) => {
-    setContainers(prev => {
-      const next = prev.filter(c => c.id !== containerId);
-      return next;
-    });
+    setContainers(prev => prev.filter(c => c.id !== containerId));
   }, []);
 
   const filteredContainers = searchQuery.trim()
@@ -160,51 +200,67 @@ function App() {
     : containers;
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>할 일 목록</h1>
-        <div className="toolbar">
+    <div className="App min-vh-100 bg-light">
+      <nav className="navbar navbar-dark bg-primary shadow-sm">
+        <div className="container">
+          <span className="navbar-brand mb-0 h1">할 일 목록</span>
+        </div>
+      </nav>
+
+      <div className="container py-4">
+        {deleteAlert && (
+          <div className="alert alert-success alert-dismissible fade show" role="alert">
+            할 일 목록이 삭제되었습니다.
+            <button type="button" className="btn-close" onClick={() => setDeleteAlert(false)} aria-label="닫기" />
+          </div>
+        )}
+
+        <div className="d-flex flex-column flex-md-row gap-2 mb-4">
           <input
-            type="text"
-            className="search-input"
+            type="search"
+            className="form-control"
             placeholder="메모 검색"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
           />
-          <button type="button" className="btn btn-primary" onClick={addNewTodoList}>
+          <button type="button" className="btn btn-primary flex-shrink-0" onClick={addNewTodoList}>
             새 할 일
           </button>
         </div>
-      </header>
-      <main className="App-main">
-        {containers.length === 0 ? (
-          <div className="empty-state">
-            <p>할 일 목록이 없습니다.</p>
-            <button type="button" className="btn btn-primary" onClick={addNewTodoList}>
-              새 할 일
-            </button>
-            <p className="hint">버튼을 누르면 할 일 컨테이너가 생기고, 바로 입력할 수 있습니다.</p>
-          </div>
-        ) : (
-          <div className="container-list">
-            {filteredContainers.map(c => (
-              <TodoListContainer
-                key={c.id}
-                container={c}
-                onEdit={setEditMode}
-                onSave={saveContainer}
-                onDelete={deleteContainer}
-                onAddTodo={addTodo}
-                onToggleTodo={toggleTodo}
-                searchQuery={searchQuery}
-              />
-            ))}
-          </div>
-        )}
-        {searchQuery.trim() && filteredContainers.length === 0 && (
-          <p className="no-results">검색 결과가 없습니다.</p>
-        )}
-      </main>
+
+        <main>
+          {containers.length === 0 ? (
+            <div className="card shadow-sm">
+              <div className="card-body text-center py-5">
+                <p className="text-muted mb-3">할 일 목록이 없습니다.</p>
+                <button type="button" className="btn btn-primary" onClick={addNewTodoList}>
+                  새 할 일
+                </button>
+                <p className="small text-muted mt-3 mb-0">버튼을 누르면 할 일 컨테이너가 생기고, 바로 입력할 수 있습니다.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="d-flex flex-column gap-3">
+              {filteredContainers.map(c => (
+                <TodoListContainer
+                  key={c.id}
+                  container={c}
+                  onEdit={setEditMode}
+                  onSave={saveContainer}
+                  onDelete={deleteContainer}
+                  onAddTodo={addTodo}
+                  onToggleTodo={toggleTodo}
+                  onAfterDelete={showDeleteAlert}
+                  searchQuery={searchQuery}
+                />
+              ))}
+            </div>
+          )}
+          {searchQuery.trim() && filteredContainers.length === 0 && (
+            <p className="text-center text-muted py-4">검색 결과가 없습니다.</p>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

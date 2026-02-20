@@ -4,9 +4,11 @@
   "type": "module",
   "scripts": {
     "crawl": "node crawl.js",
+    "excel": "node excel.js",
     "start": "node crawl.js"
   },
   "dependencies": {
-    "puppeteer": "^23.0.0"
+    "puppeteer": "^23.0.0",
+    "xlsx": "^0.18.5"
   }
 }

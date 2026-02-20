@@ -19,6 +19,18 @@ npm run crawl
 
 - **gold-prices.json** – 수집 데이터 약 100건 (날짜, 살 때 가격, 팔 때 가격, 단위)
 - **gold-prices.csv** – 동일 데이터 CSV (UTF-8 BOM)
+- **gold-prices.xlsx** – 엑셀 파일 (아래 `npm run excel` 로 생성)
+
+## 엑셀 파일 생성 (통계 포함)
+
+```bash
+npm run excel
+```
+
+`gold-prices.json`을 읽어 **gold-prices.xlsx**를 만듭니다.
+
+- **시트 "금시세 데이터"**: 날짜, 살 때 가격(3.75g), 팔 때 가격(3.75g), 단위
+- **시트 "통계"**: 기간, 유효 데이터 건수, **평균·최소·최대·중앙값·표준편차** (살 때/팔 때 각각)
 
 ## 참고
 

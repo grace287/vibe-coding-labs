@@ -1,0 +1,4 @@
+node_modules/
+gold-prices.json
+gold-prices.csv
+*.log

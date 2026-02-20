@@ -1,0 +1,12 @@
+{
+  "name": "gold-crawling",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "crawl": "node crawl.js",
+    "start": "node crawl.js"
+  },
+  "dependencies": {
+    "puppeteer": "^23.0.0"
+  }
+}

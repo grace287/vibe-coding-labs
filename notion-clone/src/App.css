@@ -141,6 +141,7 @@
   border-bottom: 1px solid rgba(55, 53, 47, 0.09);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background: rgb(255, 255, 255);
 }
 
@@ -152,6 +153,41 @@
 .breadcrumb-item {
   font-weight: 500;
   color: rgb(55, 53, 47);
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-email {
+  font-size: 13px;
+  color: rgba(55, 53, 47, 0.65);
+}
+
+.topbar-logout {
+  padding: 6px 12px;
+  font-size: 13px;
+  background: transparent;
+  border: 1px solid rgba(55, 53, 47, 0.2);
+  border-radius: 6px;
+  color: rgb(55, 53, 47);
+  cursor: pointer;
+}
+
+.topbar-logout:hover {
+  background: rgba(55, 53, 47, 0.06);
+}
+
+.notion-loading {
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-text {
+  font-size: 14px;
+  color: rgba(55, 53, 47, 0.6);
 }
 
 /* Main content */

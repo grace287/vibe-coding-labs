@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { useAuth } from './context/AuthContext'
+import Login from './pages/Login'
+import Signup from './pages/Signup'
 import './App.css'
 
 function Sidebar({ currentPageId, onSelectPage, pages }) {
@@ -71,17 +74,25 @@ function PageContent({ page }) {
   )
 }
 
-function TopBar({ pageTitle }) {
+function TopBar({ pageTitle, user, onLogout }) {
   return (
     <div className="notion-topbar">
       <div className="topbar-breadcrumb">
         <span className="breadcrumb-item">{pageTitle || '제목 없음'}</span>
+      </div>
+      <div className="topbar-user">
+        <span className="topbar-email">{user?.name || user?.email}</span>
+        <button type="button" className="topbar-logout" onClick={onLogout}>
+          로그아웃
+        </button>
       </div>
     </div>
   )
 }
 
 function App() {
+  const { user, loading, logout } = useAuth()
+  const [authMode, setAuthMode] = useState('login') // 'login' | 'signup'
   const [currentPageId, setCurrentPageId] = useState('1')
   const pages = [
     { id: '1', title: '시작하기' },
@@ -89,6 +100,22 @@ function App() {
     { id: '3', title: '메모' },
   ]
   const currentPage = pages.find((p) => p.id === currentPageId) ?? pages[0]
+
+  if (loading) {
+    return (
+      <div className="notion-app notion-loading">
+        <div className="loading-text">로딩 중...</div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return authMode === 'login' ? (
+      <Login onSwitchToSignup={() => setAuthMode('signup')} />
+    ) : (
+      <Signup onSwitchToLogin={() => setAuthMode('login')} />
+    )
+  }
 
   return (
     <div className="notion-app">
@@ -98,12 +125,12 @@ function App() {
         pages={pages}
       />
       <div className="notion-body">
-        <TopBar pageTitle={currentPage?.title} />
+        <TopBar pageTitle={currentPage?.title} user={user} onLogout={logout} />
         <main className="notion-main">
-        <div className="notion-main-inner">
-          <PageContent page={currentPage} />
-        </div>
-      </main>
+          <div className="notion-main-inner">
+            <PageContent page={currentPage} />
+          </div>
+        </main>
       </div>
     </div>
   )

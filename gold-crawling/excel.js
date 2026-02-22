@@ -80,7 +80,7 @@ function buildStatsSheet(rows) {
   const endDate = dates.length ? dates.reduce((a, b) => (a > b ? a : b), dates[0]) : ''
 
   return [
-    ['금시세 통계', ''],
+    ['금시세 통계값 계산 결과', ''],
     ['기간', `${startDate} ~ ${endDate}`],
     ['유효 데이터 건수', rows.length],
     [''],
@@ -91,6 +91,8 @@ function buildStatsSheet(rows) {
     ['중앙값', formatNum(buyStat.median), formatNum(sellStat.median)],
     ['표준편차', formatNum(buyStat.std), formatNum(sellStat.std)],
     ['데이터 개수', buyStat.count, sellStat.count],
+    [''],
+    ['※ 위 통계값은 유효한 날짜·가격 데이터만 사용해 계산되었습니다.', ''],
   ]
 }
 

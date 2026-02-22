@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Generated / output files
+gold-crawling/gold-prices.json
+gold-crawling/gold-prices.csv
+gold-crawling/gold-prices.xlsx
+gold-crawling/gold-stats.png
+yahoo-finance/stock-gainers.json
+yahoo-finance/stock-gainers.xlsx
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# Optional: lock file (주로 재현용으로 커밋하는 팀은 이 줄 제거)
+# package-lock.json

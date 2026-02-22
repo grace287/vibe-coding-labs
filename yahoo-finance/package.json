@@ -1,0 +1,15 @@
+{
+  "name": "yahoo-finance",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "crawl": "node crawl.js",
+    "excel": "node excel.js",
+    "dev": "node crawl.js && node excel.js",
+    "start": "node crawl.js && node excel.js"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "puppeteer": "^23.0.0"
+  }
+}

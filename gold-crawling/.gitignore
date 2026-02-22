@@ -2,4 +2,6 @@ node_modules/
 gold-prices.json
 gold-prices.csv
 gold-prices.xlsx
+gold-stats.png
+chart-temp.html
 *.log

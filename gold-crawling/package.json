@@ -5,6 +5,7 @@
   "scripts": {
     "crawl": "node crawl.js",
     "excel": "node excel.js",
+    "visualize": "node visualize.js",
     "start": "node crawl.js"
   },
   "dependencies": {

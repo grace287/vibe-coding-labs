@@ -9,6 +9,7 @@
 |----------|------|
 | [gold-crawling](./gold-crawling/) | 한국금거래소 금시세 크롤링 → JSON/CSV/엑셀, 통계·차트 이미지 생성 |
 | [yahoo-finance](./yahoo-finance/) | Yahoo Finance 상승주(Top Gainers) 크롤링 → JSON/엑셀 |
+| [QR-Maker](./QR-Maker/) | URL/텍스트 입력으로 QR 코드 생성 → PNG 다운로드 (웹 UI) |
 
 ## 공통 실행 흐름
 
@@ -34,6 +35,13 @@ npm run excel   # 엑셀 생성 (해당 스크립트가 있는 경우)
 - **출력**: `stock-gainers.json`, `stock-gainers.xlsx`
 - **스크립트**: `crawl`, `excel`, `dev`(크롤링+엑셀 한 번에)  
 - 자세한 사용법: [yahoo-finance/README.md](./yahoo-finance/README.md)
+
+## QR-Maker
+
+- **기능**: URL 또는 텍스트 입력 → QR 코드 생성 → PNG 다운로드
+- **실행**: `cd QR-Maker` 후 `npm start` → http://localhost:3333
+- **출력**: 브라우저에서 생성·다운로드 (qrcode.png)  
+- 자세한 사용법: [QR-Maker/README.md](./QR-Maker/README.md)
 
 ## 요구 사항
 

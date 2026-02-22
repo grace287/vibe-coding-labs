@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Maker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --surface: #1a1a1f;
+      --border: #2a2a32;
+      --text: #e8e8ec;
+      --text-muted: #8888a0;
+      --accent: #00c2a8;
+      --accent-hover: #00e0c2;
+      --radius: 12px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      line-height: 1.5;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    #input {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.875rem 1rem;
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+
+    #input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.8;
+    }
+
+    #input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .size-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .size-row label {
+      margin-bottom: 0;
+    }
+
+    .size-options {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .size-btn {
+      padding: 0.5rem 1rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    .size-btn:hover {
+      color: var(--text);
+      border-color: var(--text-muted);
+    }
+
+    .size-btn.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(0, 194, 168, 0.08);
+    }
+
+    .preview-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      min-height: 280px;
+    }
+
+    .preview-placeholder {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+
+    #preview {
+      max-width: 100%;
+      width: 256px;
+      height: 256px;
+      object-fit: contain;
+      border-radius: 8px;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.25rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: #353540;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-msg {
+      color: #e06060;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .error-msg.visible {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>QR Maker</h1>
+    <p class="subtitle">URL 또는 텍스트를 입력하면 QR 코드를 생성합니다.</p>
+
+    <div class="card">
+      <label for="input">내용 (URL 또는 텍스트)</label>
+      <textarea id="input" placeholder="https://example.com 또는 아무 텍스트" autofocus></textarea>
+      <p class="error-msg" id="error" role="alert"></p>
+      <div class="size-row">
+        <label>크기</label>
+        <div class="size-options">
+          <button type="button" class="size-btn" data-size="128">작게</button>
+          <button type="button" class="size-btn active" data-size="256">보통</button>
+          <button type="button" class="size-btn" data-size="512">크게</button>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary" id="generate" style="margin-top: 1rem;">QR 생성</button>
+    </div>
+
+    <div class="card preview-card">
+      <div class="preview-placeholder" id="placeholder">내용을 입력한 뒤 생성 버튼을 누르세요.</div>
+      <img id="preview" alt="QR 코드 미리보기" style="display: none;">
+      <div class="actions" id="actions" style="display: none;">
+        <button type="button" class="btn btn-primary" id="download">PNG 다운로드</button>
+        <button type="button" class="btn btn-secondary" id="regenerate">다시 만들기</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import QRCode from 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm';
+
+    const input = document.getElementById('input');
+    const errorEl = document.getElementById('error');
+    const placeholder = document.getElementById('placeholder');
+    const preview = document.getElementById('preview');
+    const actions = document.getElementById('actions');
+    const downloadBtn = document.getElementById('download');
+    const regenerateBtn = document.getElementById('regenerate');
+    const generateBtn = document.getElementById('generate');
+    const sizeBtns = document.querySelectorAll('.size-btn');
+
+    let currentSize = 256;
+    let lastDataUrl = null;
+
+    function showError(msg) {
+      errorEl.textContent = msg || '';
+      errorEl.classList.toggle('visible', !!msg);
+    }
+
+    function setSize(size) {
+      currentSize = size;
+      sizeBtns.forEach((btn) => btn.classList.toggle('active', Number(btn.dataset.size) === size));
+    }
+
+    async function generate() {
+      const text = input.value.trim();
+      showError('');
+      if (!text) {
+        showError('내용을 입력해 주세요.');
+        return;
+      }
+
+      try {
+        const dataUrl = await QRCode.toDataURL(text, {
+          width: currentSize,
+          margin: 2,
+          color: { dark: '#000000', light: '#ffffff' },
+        });
+        lastDataUrl = dataUrl;
+        preview.src = dataUrl;
+        preview.style.display = 'block';
+        preview.style.width = Math.min(currentSize, 320) + 'px';
+        preview.style.height = Math.min(currentSize, 320) + 'px';
+        placeholder.style.display = 'none';
+        actions.style.display = 'flex';
+      } catch (e) {
+        showError('QR 생성에 실패했습니다. 내용이 너무 길 수 있습니다.');
+        console.error(e);
+      }
+    }
+
+    function download() {
+      if (!lastDataUrl) return;
+      const a = document.createElement('a');
+      a.href = lastDataUrl;
+      a.download = 'qrcode.png';
+      a.click();
+    }
+
+    sizeBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        setSize(Number(btn.dataset.size));
+        if (lastDataUrl) generate();
+      });
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        generate();
+      }
+    });
+
+    downloadBtn.addEventListener('click', download);
+    regenerateBtn.addEventListener('click', () => generate());
+    generateBtn.addEventListener('click', () => generate());
+
+    input.closest('form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      generate();
+    });
+  </script>
+</body>
+</html>

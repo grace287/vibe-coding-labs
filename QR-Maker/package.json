@@ -1,0 +1,8 @@
+{
+  "name": "qr-maker",
+  "private": true,
+  "scripts": {
+    "start": "npx serve . -p 3333",
+    "dev": "npx serve . -p 3333"
+  }
+}
